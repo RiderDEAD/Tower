@@ -955,9 +955,9 @@ const settings = {
 
 // Параметры сложности
 const DIFF_PARAMS = {
-  easy:   { startGold: 300, enemyHPMult: 0.7, enemySpeedMult: 0.85 },
-  normal: { startGold: 200, enemyHPMult: 1.0, enemySpeedMult: 1.0 },
-  hard:   { startGold: 120, enemyHPMult: 1.6, enemySpeedMult: 1.25 }
+  easy:   { startGold: 600, enemyHPMult: 0.6, enemySpeedMult: 0.45 },
+  normal: { startGold: 400, enemyHPMult: 1.0, enemySpeedMult: 0.6 },
+  hard:   { startGold: 250, enemyHPMult: 1.5, enemySpeedMult: 0.85 }
 };
 
 // ===================== СОСТОЯНИЕ ИГРЫ =====================
@@ -1242,10 +1242,10 @@ function spawnEnemy() {
   }
 
   const types = {
-    normal: { hp: 60, speed: 1.4, size: 0.35, reward: 10, color: '#ff4060' },
-    fast:   { hp: 30, speed: 2.5, size: 0.25, reward: 8,  color: '#ffaa00' },
-    tank:   { hp: 200, speed: 0.7, size: 0.5, reward: 20, color: '#4488ff' },
-    boss:   { hp: 600, speed: 0.5, size: 0.75, reward: 60, color: '#ff00aa' },
+    normal: { hp: 60, speed: 1.4, size: 0.35, reward: 15, color: '#ff4060' },
+    fast:   { hp: 30, speed: 2.2, size: 0.25, reward: 12,  color: '#ffaa00' },
+    tank:   { hp: 200, speed: 0.65, size: 0.5, reward: 30, color: '#4488ff' },
+    boss:   { hp: 600, speed: 0.4, size: 0.75, reward: 80, color: '#ff00aa' },
   };
 
   const def = types[type];
@@ -1263,7 +1263,7 @@ function spawnEnemy() {
     waypointIdx: 0,
     hp: maxHP,
     maxHP,
-    speed: speed * G.tileSize * 0.016, // пикс/мс
+    speed: speed * G.tileSize * 0.007, // пикс/мс
     size: def.size * G.tileSize,
     reward: def.reward,
     color: def.color,
