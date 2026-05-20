@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEXUS DEFENSE</title>
+<style>
+/* ===== ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --neon-cyan: #00ffff;
+  --neon-pink: #ff007a;
+  --neon-purple: #bf00ff;
+  --neon-green: #00ff88;
+  --neon-orange: #ff6600;
+  --dark-bg: #030308;
+  --dark-panel: #080815;
+  --dark-card: #0d0d20;
+  --border-glow: rgba(0,255,255,0.3);
+  --text-dim: rgba(200,200,255,0.6);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--dark-bg);
+  color: #fff;
+  font-family: 'Orbitron', 'Courier New', monospace;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* ===== ЭКРАНЫ ===== */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 10;
+}
+
+.screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.97);
+}
+
+/* Анимированный фон сетки */
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridMove 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes gridMove {
+  from { background-position: 0 0; }
+  to { background-position: 40px 40px; }
+}
+
+/* ===== ГЛАВНОЕ МЕНЮ ===== */
+#menuScreen {
+  background: radial-gradient(ellipse at 50% 40%, #0a001a 0%, #030308 70%);
+}
+
+.menu-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-align: center;
+  color: #fff;
+  text-shadow:
+    0 0 10px var(--neon-cyan),
+    0 0 30px var(--neon-cyan),
+    0 0 60px var(--neon-cyan),
+    0 0 100px var(--neon-purple);
+  animation: titlePulse 3s ease-in-out infinite;
+  margin-bottom: 0.2em;
+}
+
+.menu-subtitle {
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  color: var(--neon-pink);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+  text-shadow: 0 0 10px var(--neon-pink);
+  animation: subtitleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes titlePulse {
+  0%, 100% { text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 60px var(--neon-cyan), 0 0 100px var(--neon-purple); }
+  50% { text-shadow: 0 0 20px var(--neon-cyan), 0 0 50px var(--neon-cyan), 0 0 100px var(--neon-cyan), 0 0 150px var(--neon-purple); }
+}
+
+@keyframes subtitleGlow {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+/* ===== КНОПКИ ===== */
+.btn {
+  display: block;
+  padding: 0.8em 2.5em;
+  margin: 0.5rem auto;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  background: transparent;
+  border: 1px solid var(--neon-cyan);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,255,255,0.2), inset 0 0 10px rgba(0,255,255,0.05);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,255,255,0.15), transparent);
+  transform: translateY(-50%);
+  transition: left 0.4s ease;
+}
+
+.btn:hover::before { left: 100%; }
+
+.btn:hover {
+  color: #fff;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(0,255,255,0.5), 0 0 40px rgba(0,255,255,0.2), inset 0 0 20px rgba(0,255,255,0.1);
+  text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-pink {
+  color: var(--neon-pink);
+  border-color: var(--neon-pink);
+  box-shadow: 0 0 10px rgba(255,0,122,0.2), inset 0 0 10px rgba(255,0,122,0.05);
+}
+.btn-pink::before { background: linear-gradient(90deg, transparent, rgba(255,0,122,0.15), transparent); }
+.btn-pink:hover {
+  border-color: var(--neon-pink);
+  box-shadow: 0 0 20px rgba(255,0,122,0.5), 0 0 40px rgba(255,0,122,0.2), inset 0 0 20px rgba(255,0,122,0.1);
+  text-shadow: 0 0 10px var(--neon-pink);
+}
+
+.btn-green {
+  color: var(--neon-green);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(0,255,136,0.2), inset 0 0 10px rgba(0,255,136,0.05);
+}
+.btn-green:hover {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 20px rgba(0,255,136,0.5), 0 0 40px rgba(0,255,136,0.2), inset 0 0 20px rgba(0,255,136,0.1);
+  text-shadow: 0 0 10px var(--neon-green);
+}
+
+/* ===== МОДАЛЬНЫЕ ОКНА ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-box {
+  background: var(--dark-card);
+  border: 1px solid var(--neon-purple);
+  border-radius: 8px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 40px rgba(191,0,255,0.4), 0 0 80px rgba(191,0,255,0.1);
+  text-align: center;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-box { transform: scale(1); }
+
+.modal-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  color: var(--neon-purple);
+  text-shadow: 0 0 20px var(--neon-purple);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.2em;
+}
+
+.modal-text {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 2;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.modal-text strong {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px var(--neon-cyan);
+  display: block;
+  font-size: 1.05rem;
+}
+
+/* ===== НАСТРОЙКИ ===== */
+#settingsScreen {
+  background: radial-gradient(ellipse at 50% 40%, #00100a 0%, #030308 70%);
+}
+
+.settings-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  color: var(--neon-green);
+  text-shadow: 0 0 20px var(--neon-green);
+  margin-bottom: 2rem;
+  letter-spacing: 0.3em;
+}
+
+.settings-panel {
+  background: var(--dark-card);
+  border: 1px solid rgba(0,255,136,0.3);
+  border-radius: 8px;
+  padding: 2rem;
+  width: min(400px, 90vw);
+  box-shadow: 0 0 30px rgba(0,255,136,0.1);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.settings-row:last-child { border-bottom: none; }
+
+/* Тумблер */
+.toggle {
+  position: relative;
+  width: 52px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #222;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 26px;
+  transition: 0.3s;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; top: 3px;
+  background: #555;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle input:checked + .toggle-slider {
+  background: rgba(0,255,136,0.2);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(0,255,136,0.4);
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(26px);
+  background: var(--neon-green);
+  box-shadow: 0 0 8px var(--neon-green);
+}
+
+/* Выбор сложности */
+.difficulty-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.diff-btn {
+  flex: 1;
+  padding: 0.5em 0.3em;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.diff-btn.active-easy { border-color: var(--neon-green); color: var(--neon-green); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+.diff-btn.active-normal { border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0,255,255,0.3); }
+.diff-btn.active-hard { border-color: var(--neon-pink); color: var(--neon-pink); box-shadow: 0 0 10px rgba(255,0,122,0.3); }
+
+/* ===== ИГРОВОЙ ЭКРАН ===== */
+#gameScreen {
+  background: #000;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+#gameCanvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* ===== HUD ===== */
+#hud {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(3,3,8,0.9);
+  border-bottom: 1px solid rgba(0,255,255,0.2);
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
+  z-index: 20;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: clamp(0.65rem, 2vw, 0.85rem);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.hud-icon { font-size: 1.1em; }
+.hud-label { color: var(--text-dim); }
+.hud-value { color: #fff; font-weight: 700; }
+
+#hudHP .hud-value { color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); }
+#hudGold .hud-value { color: #ffd700; text-shadow: 0 0 8px #ffd700; }
+#hudWave .hud-value { color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
+
+.hud-spacer { flex: 1; }
+
+.pause-btn {
+  background: transparent;
+  border: 1px solid rgba(0,255,255,0.4);
+  border-radius: 4px;
+  color: var(--neon-cyan);
+  font-size: 1rem;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.pause-btn:hover {
+  background: rgba(0,255,255,0.1);
+  box-shadow: 0 0 10px rgba(0,255,255,0.3);
+}
+
+/* ===== НИЖНЯЯ ПАНЕЛЬ БАШЕН ===== */
+#towerPanel {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(3,3,8,0.95);
+  border-top: 1px solid rgba(0,255,255,0.2);
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
+  padding: 0.5rem;
+  z-index: 20;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tower-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--dark-card);
+  transition: all 0.2s ease;
+  min-width: 70px;
+  position: relative;
+}
+
+.tower-card:hover, .tower-card.selected {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0,255,255,0.3);
+  background: rgba(0,255,255,0.05);
+}
+
+.tower-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-bottom: 0.3rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.tower-name {
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.tower-cost {
+  font-size: 0.7rem;
+  color: #ffd700;
+  font-weight: 700;
+}
+
+.tower-card.cant-afford {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== ЭКРАН ПАУЗЫ ===== */
+#pauseScreen {
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+}
+
+.pause-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 6vw, 4rem);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 30px var(--neon-cyan);
+  margin-bottom: 2rem;
+  letter-spacing: 0.3em;
+}
+
+/* ===== GAME OVER / VICTORY ===== */
+#gameOverScreen {
+  background: radial-gradient(ellipse at center, #200000 0%, #030308 70%);
+  z-index: 60;
+}
+
+#victoryScreen {
+  background: radial-gradient(ellipse at center, #001a0a 0%, #030308 70%);
+  z-index: 60;
+}
+
+.result-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 7vw, 5rem);
+  font-weight: 900;
+  margin-bottom: 1rem;
+  letter-spacing: 0.15em;
+}
+
+#gameOverScreen .result-title {
+  color: var(--neon-pink);
+  text-shadow: 0 0 20px var(--neon-pink), 0 0 60px var(--neon-pink);
+}
+
+#victoryScreen .result-title {
+  color: var(--neon-green);
+  text-shadow: 0 0 20px var(--neon-green), 0 0 60px var(--neon-green);
+}
+
+.result-stats {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 2rem;
+  line-height: 2;
+  text-align: center;
+}
+
+.result-stats span {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ===== ПОДСКАЗКА ВЫБРАННОЙ БАШНИ ===== */
+#towerInfo {
+  position: fixed;
+  top: 60px;
+  right: 10px;
+  background: var(--dark-card);
+  border: 1px solid rgba(0,255,255,0.3);
+  border-radius: 6px;
+  padding: 0.8rem;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  z-index: 20;
+  min-width: 140px;
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 0 15px rgba(0,255,255,0.1);
+  line-height: 1.8;
+}
+
+#towerInfo.visible { display: block; }
+
+/* ===== МЕНЮ АПГРЕЙДА/ПРОДАЖИ ===== */
+#upgradeMenu {
+  position: fixed;
+  background: var(--dark-card);
+  border: 1px solid var(--neon-purple);
+  border-radius: 6px;
+  padding: 1rem;
+  z-index: 30;
+  display: none;
+  box-shadow: 0 0 20px rgba(191,0,255,0.3);
+  min-width: 160px;
+}
+
+#upgradeMenu.visible { display: block; }
+
+#upgradeMenu .menu-label {
+  font-size: 0.7rem;
+  color: var(--neon-purple);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+#upgradeMenu button {
+  display: block;
+  width: 100%;
+  padding: 0.4em 0.8em;
+  margin-bottom: 0.4rem;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+#upgradeMenu button:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0,255,255,0.2);
+}
+
+#upgradeMenu button:last-child {
+  color: var(--neon-pink);
+}
+#upgradeMenu button:last-child:hover {
+  border-color: var(--neon-pink);
+  box-shadow: 0 0 8px rgba(255,0,122,0.2);
+}
+
+/* ===== ТРЯСКА ЭКРАНА ===== */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) translateY(2px); }
+  40% { transform: translateX(8px) translateY(-2px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+
+#gameScreen.shake { animation: shake 0.3s ease; }
+
+/* ===== WAVE ANNOUNCE ===== */
+#waveAnnounce {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 30px var(--neon-cyan);
+  letter-spacing: 0.3em;
+  z-index: 25;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#waveAnnounce.visible { opacity: 1; }
+
+/* ===== СЛЕДУЮЩАЯ ВОЛНА ===== */
+#nextWaveBtn {
+  position: fixed;
+  bottom: 90px;
+  right: 10px;
+  z-index: 25;
+  font-size: 0.65rem;
+  padding: 0.6em 1em;
+  min-width: auto;
+  display: none;
+}
+
+#nextWaveBtn.visible { display: block; }
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 600px) {
+  .tower-card { min-width: 60px; padding: 0.4rem 0.5rem; }
+  .tower-icon { width: 30px; height: 30px; font-size: 1rem; }
+  .tower-name { font-size: 0.5rem; }
+  .tower-cost { font-size: 0.65rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== ГЛАВНОЕ МЕНЮ ===== -->
+<div id="menuScreen" class="screen">
+  <div class="menu-title">NEXUS</div>
+  <div class="menu-title" style="font-size:clamp(1.5rem,5vw,3.5rem); margin-top:-0.5em;">DEFENSE</div>
+  <div class="menu-subtitle">Cyber Warfare Protocol</div>
+  <button class="btn btn-green" onclick="startGame()">▶ &nbsp;Играть</button>
+  <button class="btn" onclick="showScreen('settingsScreen')">⚙ &nbsp;Настройки</button>
+  <button class="btn btn-pink" onclick="showAuthors()">✦ &nbsp;Авторы</button>
+</div>
+
+<!-- ===== ЭКРАН НАСТРОЕК ===== -->
+<div id="settingsScreen" class="screen hidden">
+  <div class="settings-title">// НАСТРОЙКИ</div>
+  <div class="settings-panel">
+    <div class="settings-row">
+      <span>Звуковые эффекты</span>
+      <label class="toggle">
+        <input type="checkbox" id="sfxToggle" checked onchange="settings.sfx = this.checked">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="settings-row">
+      <span>Музыка</span>
+      <label class="toggle">
+        <input type="checkbox" id="musicToggle" checked onchange="toggleMusic(this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="settings-row" style="flex-direction:column; align-items:flex-start; gap:0.5rem;">
+      <span>Сложность</span>
+      <div class="difficulty-group">
+        <button class="diff-btn" onclick="setDifficulty('easy', this)">Легко</button>
+        <button class="diff-btn active-normal" onclick="setDifficulty('normal', this)">Нормально</button>
+        <button class="diff-btn" onclick="setDifficulty('hard', this)">Хардкор</button>
+      </div>
+    </div>
+  </div>
+  <button class="btn" style="margin-top:1.5rem;" onclick="showScreen('menuScreen')">← Назад</button>
+</div>
+
+<!-- ===== МОДАЛ: АВТОРЫ ===== -->
+<div id="authorsModal" class="modal-overlay" onclick="closeAuthors(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">✦ &nbsp;АВТОРЫ</div>
+    <div class="modal-text">
+      <strong>A.D.</strong>
+      Разработчик
+      <br><br>
+      <strong>ALT University</strong>
+      Academy of Logistics and Transport
+    </div>
+    <button class="btn btn-pink" onclick="closeAuthors()">Закрыть</button>
+  </div>
+</div>
+
+<!-- ===== ИГРОВОЙ ЭКРАН ===== -->
+<div id="gameScreen" class="screen hidden" style="z-index:5;">
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-item" id="hudHP">
+      <span class="hud-icon">❤</span>
+      <span class="hud-label">HP</span>
+      <span class="hud-value" id="hudHPVal">100</span>
+    </div>
+    <div class="hud-item" id="hudGold">
+      <span class="hud-icon">◈</span>
+      <span class="hud-label">GOLD</span>
+      <span class="hud-value" id="hudGoldVal">200</span>
+    </div>
+    <div class="hud-item" id="hudWave">
+      <span class="hud-icon">◉</span>
+      <span class="hud-label">WAVE</span>
+      <span class="hud-value" id="hudWaveVal">0 / 20</span>
+    </div>
+    <div class="hud-spacer"></div>
+    <button class="pause-btn" onclick="togglePause()">⏸</button>
+  </div>
+
+  <!-- Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Тайл выбранной башни -->
+  <div id="towerInfo"></div>
+
+  <!-- Меню апгрейда -->
+  <div id="upgradeMenu">
+    <span class="menu-label" id="upgMenuLabel">БАШНЯ</span>
+    <button id="upgBtn" onclick="upgradeSelected()"></button>
+    <button onclick="sellSelected()">Продать (+<span id="sellVal"></span>◈)</button>
+    <button onclick="closeUpgradeMenu()">✕ Закрыть</button>
+  </div>
+
+  <!-- Кнопка следующей волны -->
+  <button class="btn btn-green" id="nextWaveBtn" onclick="startNextWave()">⚡ ВОЛНА</button>
+
+  <!-- Анонс волны -->
+  <div id="waveAnnounce"></div>
+
+  <!-- Панель башен -->
+  <div id="towerPanel">
+    <div class="tower-card" id="card-laser" onclick="selectTower('laser')">
+      <div class="tower-icon" style="background:radial-gradient(circle,#00ffff44,transparent);border:2px solid #00ffff;box-shadow:0 0 10px #00ffff;">⚡</div>
+      <div class="tower-name">Лазер</div>
+      <div class="tower-cost">80◈</div>
+    </div>
+    <div class="tower-card" id="card-slow" onclick="selectTower('slow')">
+      <div class="tower-icon" style="background:radial-gradient(circle,#bf00ff44,transparent);border:2px solid #bf00ff;box-shadow:0 0 10px #bf00ff;">❄</div>
+      <div class="tower-name">Замедл.</div>
+      <div class="tower-cost">100◈</div>
+    </div>
+    <div class="tower-card" id="card-rocket" onclick="selectTower('rocket')">
+      <div class="tower-icon" style="background:radial-gradient(circle,#ff660044,transparent);border:2px solid #ff6600;box-shadow:0 0 10px #ff6600;">🚀</div>
+      <div class="tower-name">Ракета</div>
+      <div class="tower-cost">150◈</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ПАУЗА ===== -->
+<div id="pauseScreen" class="screen hidden">
+  <div class="pause-title">// ПАУЗА</div>
+  <button class="btn btn-green" onclick="togglePause()">▶ Продолжить</button>
+  <button class="btn btn-pink" onclick="goMenu()">⏹ В главное меню</button>
+</div>
+
+<!-- ===== GAME OVER ===== -->
+<div id="gameOverScreen" class="screen hidden">
+  <div class="result-title">// ПОРАЖЕНИЕ</div>
+  <div class="result-stats" id="gameOverStats"></div>
+  <button class="btn btn-pink" onclick="restartGame()">↺ Переиграть</button>
+  <button class="btn" onclick="goMenu()">⏹ В меню</button>
+</div>
+
+<!-- ===== ПОБЕДА ===== -->
+<div id="victoryScreen" class="screen hidden">
+  <div class="result-title">ПОБЕДА</div>
+  <div class="result-stats" id="victoryStats"></div>
+  <button class="btn btn-green" onclick="restartGame()">↺ Сыграть снова</button>
+  <button class="btn" onclick="goMenu()">⏹ В меню</button>
+</div>
+
+<script>
+/* =====================================================
+   NEXUS DEFENSE — Tower Defense Game
+   Полностью автономная игра на чистом JS/Canvas/WebAudio
+   ===================================================== */
+
+// ===================== AUDIO ENGINE =====================
+const Audio = (() => {
+  let ctx = null;
+  let musicNodes = null;
+  let musicGain = null;
+
+  // Инициализация AudioContext (требует взаимодействия пользователя)
+  function init() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (settings.music) startMusic();
+  }
+
+  // Вспомогательная функция: создать осциллятор
+  function playTone(freq, type, duration, startGain, endGain, startTime, detune = 0) {
+    if (!ctx || !settings.sfx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    osc.detune.value = detune;
+    gain.gain.setValueAtTime(startGain, startTime);
+    gain.gain.exponentialRampToValueAtTime(Math.max(endGain, 0.001), startTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  }
+
+  // Звук клика по меню
+  function click() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    playTone(800, 'sine', 0.08, 0.3, 0.001, t);
+    playTone(1200, 'sine', 0.06, 0.15, 0.001, t + 0.02);
+  }
+
+  // Звук постройки башни
+  function build() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    [400, 600, 900, 1200].forEach((f, i) => {
+      playTone(f, 'sine', 0.12, 0.25, 0.001, t + i * 0.07);
+    });
+  }
+
+  // Звук лазерного выстрела
+  function laser() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1800, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.15);
+    gain.gain.setValueAtTime(0.12, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.15);
+  }
+
+  // Звук взрыва ракеты
+  function explosion() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const bufferSize = ctx.sampleRate * 0.3;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 300;
+    gain.gain.setValueAtTime(0.8, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    source.start(t);
+    source.stop(t + 0.35);
+  }
+
+  // Звук проигрыша
+  function gameOver() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    [440, 330, 220, 110].forEach((f, i) => {
+      playTone(f, 'sine', 0.4, 0.3, 0.001, t + i * 0.35);
+    });
+  }
+
+  // Фоновая музыка (арпеджио синтвейв)
+  function startMusic() {
+    if (!ctx || musicNodes) return;
+    musicGain = ctx.createGain();
+    musicGain.gain.value = 0.07;
+    musicGain.connect(ctx.destination);
+
+    const notes = [130.81, 164.81, 196.0, 246.94, 261.63, 196.0, 164.81, 246.94];
+    let beat = 0;
+    const interval = 0.22;
+
+    const schedule = () => {
+      const t = ctx.currentTime;
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(0, t + beat * interval * notes.length + i * interval);
+        g.gain.linearRampToValueAtTime(0.8, t + beat * interval * notes.length + i * interval + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + beat * interval * notes.length + i * interval + interval * 0.9);
+        osc.connect(g);
+        g.connect(musicGain);
+        osc.start(t + beat * interval * notes.length + i * interval);
+        osc.stop(t + beat * interval * notes.length + i * interval + interval);
+      });
+      beat++;
+    };
+
+    schedule();
+    musicNodes = setInterval(schedule, notes.length * interval * 1000);
+  }
+
+  function stopMusic() {
+    if (musicNodes) { clearInterval(musicNodes); musicNodes = null; }
+    if (musicGain) { musicGain.disconnect(); musicGain = null; }
+  }
+
+  return { init, click, build, laser, explosion, gameOver, startMusic, stopMusic };
+})();
+
+// ===================== НАСТРОЙКИ =====================
+const settings = {
+  sfx: true,
+  music: true,
+  difficulty: 'normal'
+};
+
+// Параметры сложности
+const DIFF_PARAMS = {
+  easy:   { startGold: 300, enemyHPMult: 0.7, enemySpeedMult: 0.85 },
+  normal: { startGold: 200, enemyHPMult: 1.0, enemySpeedMult: 1.0 },
+  hard:   { startGold: 120, enemyHPMult: 1.6, enemySpeedMult: 1.25 }
+};
+
+// ===================== СОСТОЯНИЕ ИГРЫ =====================
+let G = {}; // Главный объект состояния игры
+
+function initGameState() {
+  const diff = DIFF_PARAMS[settings.difficulty];
+  G = {
+    running: false,
+    paused: false,
+    baseHP: 20,
+    gold: diff.startGold,
+    wave: 0,
+    totalWaves: 20,
+    enemies: [],
+    towers: [],
+    projectiles: [],
+    particles: [],
+    floatingTexts: [],
+    explosions: [],
+
+    selectedTowerType: null, // Тип выбранной для постройки башни
+    selectedTower: null,     // Уже построенная башня (для апгрейда)
+
+    mouseX: 0,
+    mouseY: 0,
+    lastTime: 0,
+    waveInProgress: false,
+    enemiesSpawned: 0,
+    enemiesToSpawn: 0,
+    spawnTimer: 0,
+    betweenWaves: true,
+    score: 0,
+    kills: 0,
+
+    // Вычисленные параметры
+    tileSize: 0,
+    canvasW: 0,
+    canvasH: 0,
+    hudH: 0,
+    panelH: 0,
+    path: [],       // Пиксельные координаты пути (центры)
+    blockedCells: new Set(), // Ячейки занятые дорогой или башнями
+    diff,
+  };
+}
+
+// ===================== ПУТЬ ВРАГОВ =====================
+// Путь задаётся в единицах тайлов (col, row)
+const PATH_TILES = [
+  [0,2],[1,2],[2,2],[3,2],[3,3],[3,4],[3,5],[3,6],
+  [4,6],[5,6],[6,6],[7,6],[8,6],[8,5],[8,4],[8,3],
+  [9,3],[10,3],[11,3],[12,3],[12,4],[12,5],[12,6],[12,7],
+  [11,7],[10,7],[9,7],[8,7],[7,7],[6,7],[5,7],[4,7],
+  [4,8],[4,9],[4,10],[4,11],[5,11],[6,11],[7,11],[8,11],
+  [8,10],[8,9],[8,8],[9,8],[10,8],[11,8],[12,8],[13,8],
+  [14,8],[15,8],[15,9],[15,10],[15,11],[15,12],[16,12],[17,12]
+];
+
+// ===================== КОНСТАНТЫ БАШЕН =====================
+const TOWER_DEFS = {
+  laser: {
+    name: 'Лазер',
+    cost: 80,
+    color: '#00ffff',
+    range: 4.5,
+    damage: 8,
+    fireRate: 0.6,
+    aoeRadius: 0,
+    upgradeCost: 60,
+    upgradeMult: { range: 1.3, damage: 1.5, fireRate: 0.8 },
+    maxLevel: 3,
+  },
+  slow: {
+    name: 'Замедл.',
+    cost: 100,
+    color: '#bf00ff',
+    range: 4.0,
+    damage: 3,
+    fireRate: 1.2,
+    aoeRadius: 0,
+    slowDuration: 2.0,
+    slowFactor: 0.4,
+    upgradeCost: 75,
+    upgradeMult: { range: 1.2, damage: 1.3, fireRate: 0.85 },
+    maxLevel: 3,
+  },
+  rocket: {
+    name: 'Ракета',
+    cost: 150,
+    color: '#ff6600',
+    range: 5.0,
+    damage: 40,
+    fireRate: 2.5,
+    aoeRadius: 1.5,
+    upgradeCost: 100,
+    upgradeMult: { range: 1.2, damage: 1.6, aoeRadius: 1.2 },
+    maxLevel: 3,
+  }
+};
+
+// ===================== UI HELPERS =====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.toggle('hidden', s.id !== id);
+  });
+}
+
+function showAuthors() {
+  Audio.init();
+  Audio.click();
+  document.getElementById('authorsModal').classList.add('active');
+}
+
+function closeAuthors(e) {
+  if (e && e.target !== document.getElementById('authorsModal') && !e.type) return;
+  document.getElementById('authorsModal').classList.remove('active');
+}
+
+function setDifficulty(d, btn) {
+  Audio.init(); Audio.click();
+  settings.difficulty = d;
+  document.querySelectorAll('.diff-btn').forEach(b => {
+    b.className = 'diff-btn';
+  });
+  btn.classList.add('active-' + d);
+}
+
+function toggleMusic(on) {
+  settings.music = on;
+  if (on) Audio.startMusic(); else Audio.stopMusic();
+}
+
+// ===================== CANVAS SETUP =====================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const hudH = document.getElementById('hud').offsetHeight;
+  const panelH = document.getElementById('towerPanel').offsetHeight;
+  G.hudH = hudH;
+  G.panelH = panelH;
+  const w = window.innerWidth;
+  const h = window.innerHeight - hudH - panelH;
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.marginTop = hudH + 'px';
+  G.canvasW = w;
+  G.canvasH = h;
+
+  // Вычисляем размер тайла исходя из пути (нам нужно 18 колонок и 14 рядов)
+  const cols = 18, rows = 14;
+  G.tileSize = Math.min(Math.floor(w / cols), Math.floor(h / rows));
+
+  // Генерируем пиксельные координаты пути
+  G.path = PATH_TILES.map(([col, row]) => ({
+    x: (col + 0.5) * G.tileSize,
+    y: (row + 0.5) * G.tileSize
+  }));
+
+  // Занятые дорогой ячейки
+  G.blockedCells = new Set();
+  PATH_TILES.forEach(([col, row]) => {
+    // Блокируем саму ячейку и соседей для ширины дороги
+    for (let dc = -1; dc <= 1; dc++)
+      for (let dr = -1; dr <= 1; dr++)
+        G.blockedCells.add(`${col + dc},${row + dr}`);
+  });
+}
+
+// ===================== ЗАПУСК ИГРЫ =====================
+function startGame() {
+  Audio.init();
+  Audio.click();
+  initGameState();
+  showScreen('gameScreen');
+  document.getElementById('upgradeMenu').classList.remove('visible');
+  document.getElementById('towerInfo').classList.remove('visible');
+  G.selectedTowerType = null;
+
+  // Сбрасываем карточки башен
+  document.querySelectorAll('.tower-card').forEach(c => c.classList.remove('selected'));
+
+  requestAnimationFrame(() => {
+    resizeCanvas();
+    updateHUD();
+    G.running = true;
+    G.betweenWaves = true;
+    showNextWaveBtn(true);
+    requestAnimationFrame(gameLoop);
+  });
+}
+
+function restartGame() {
+  Audio.click();
+  startGame();
+}
+
+function goMenu() {
+  Audio.click();
+  G.running = false;
+  showScreen('menuScreen');
+}
+
+function togglePause() {
+  if (!G.running) return;
+  Audio.click();
+  G.paused = !G.paused;
+  if (G.paused) {
+    showScreen('pauseScreen');
+    document.getElementById('pauseScreen').classList.remove('hidden');
+    // Оставим gameScreen тоже видимым
+    document.getElementById('gameScreen').classList.remove('hidden');
+  } else {
+    document.getElementById('pauseScreen').classList.add('hidden');
+    requestAnimationFrame(gameLoop);
+  }
+}
+
+// ===================== HUD =====================
+function updateHUD() {
+  document.getElementById('hudHPVal').textContent = G.baseHP;
+  document.getElementById('hudGoldVal').textContent = G.gold;
+  document.getElementById('hudWaveVal').textContent = `${G.wave} / ${G.totalWaves}`;
+
+  // Обновляем доступность карточек
+  const costs = { laser: 80, slow: 100, rocket: 150 };
+  Object.entries(costs).forEach(([type, cost]) => {
+    const card = document.getElementById('card-' + type);
+    card.classList.toggle('cant-afford', G.gold < cost);
+  });
+}
+
+function showNextWaveBtn(show) {
+  const btn = document.getElementById('nextWaveBtn');
+  btn.classList.toggle('visible', show);
+}
+
+// ===================== ВОЛНЫ =====================
+function startNextWave() {
+  if (G.waveInProgress || G.wave >= G.totalWaves) return;
+  Audio.click();
+  G.wave++;
+  G.betweenWaves = false;
+  showNextWaveBtn(false);
+  closeUpgradeMenu();
+  G.selectedTowerType = null;
+  document.querySelectorAll('.tower-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('towerInfo').classList.remove('visible');
+
+  // Анонс волны
+  const ann = document.getElementById('waveAnnounce');
+  ann.textContent = `ВОЛНА ${G.wave}`;
+  ann.classList.add('visible');
+  setTimeout(() => ann.classList.remove('visible'), 2000);
+
+  // Параметры волны
+  const count = 8 + G.wave * 2;
+  G.enemiesToSpawn = count;
+  G.enemiesSpawned = 0;
+  G.spawnTimer = 0;
+  G.waveInProgress = true;
+  updateHUD();
+}
+
+// ===================== СПАВН ВРАГОВ =====================
+function spawnEnemy() {
+  const wave = G.wave;
+  const diff = G.diff;
+
+  // Определяем тип врага
+  let type;
+  const r = Math.random();
+  if (wave % 5 === 0 && G.enemiesSpawned === 0) {
+    type = 'boss';
+  } else if (r < 0.35) {
+    type = 'fast';
+  } else if (r < 0.65) {
+    type = 'tank';
+  } else {
+    type = 'normal';
+  }
+
+  const types = {
+    normal: { hp: 60, speed: 1.4, size: 0.35, reward: 10, color: '#ff4060' },
+    fast:   { hp: 30, speed: 2.5, size: 0.25, reward: 8,  color: '#ffaa00' },
+    tank:   { hp: 200, speed: 0.7, size: 0.5, reward: 20, color: '#4488ff' },
+    boss:   { hp: 600, speed: 0.5, size: 0.75, reward: 60, color: '#ff00aa' },
+  };
+
+  const def = types[type];
+  const hpScale = 1 + (wave - 1) * 0.12;
+  const spdScale = 1 + (wave - 1) * 0.04;
+
+  const maxHP = Math.round(def.hp * hpScale * diff.enemyHPMult);
+  const speed = def.speed * spdScale * diff.enemySpeedMult;
+
+  const enemy = {
+    id: Math.random(),
+    type,
+    x: G.path[0].x,
+    y: G.path[0].y,
+    waypointIdx: 0,
+    hp: maxHP,
+    maxHP,
+    speed: speed * G.tileSize * 0.016, // пикс/мс
+    size: def.size * G.tileSize,
+    reward: def.reward,
+    color: def.color,
+    slowed: 0,       // Время замедления (сек)
+    slowFactor: 1,
+    alive: true,
+    reached: false,
+  };
+  G.enemies.push(enemy);
+}
+
+// ===================== ДВИЖЕНИЕ ВРАГОВ =====================
+function updateEnemies(dt) {
+  G.enemies.forEach(enemy => {
+    if (!enemy.alive || enemy.reached) return;
+
+    // Замедление
+    if (enemy.slowed > 0) {
+      enemy.slowed -= dt;
+      if (enemy.slowed <= 0) { enemy.slowed = 0; enemy.slowFactor = 1; }
+    }
+
+    const spd = enemy.speed * (enemy.slowed > 0 ? enemy.slowFactor : 1) * 1000; // пикс/сек
+    let remaining = spd * dt;
+
+    while (remaining > 0 && enemy.waypointIdx < G.path.length - 1) {
+      const target = G.path[enemy.waypointIdx + 1];
+      const dx = target.x - enemy.x;
+      const dy = target.y - enemy.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (remaining >= dist) {
+        enemy.x = target.x;
+        enemy.y = target.y;
+        enemy.waypointIdx++;
+        remaining -= dist;
+      } else {
+        const ratio = remaining / dist;
+        enemy.x += dx * ratio;
+        enemy.y += dy * ratio;
+        remaining = 0;
+      }
+    }
+
+    // Достиг финиша
+    if (enemy.waypointIdx >= G.path.length - 1) {
+      enemy.reached = true;
+      enemy.alive = false;
+      G.baseHP = Math.max(0, G.baseHP - 1);
+      updateHUD();
+      shakeScreen();
+      if (G.baseHP <= 0) endGame(false);
+    }
+  });
+
+  // Удаляем мёртвых и достигших финиша
+  G.enemies = G.enemies.filter(e => e.alive && !e.reached);
+}
+
+// ===================== БАШНИ =====================
+function selectTower(type) {
+  if (G.gold < TOWER_DEFS[type].cost) return;
+  Audio.init(); Audio.click();
+  G.selectedTowerType = type;
+  G.selectedTower = null;
+  closeUpgradeMenu();
+
+  document.querySelectorAll('.tower-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-' + type).classList.add('selected');
+
+  // Инфо о башне
+  const def = TOWER_DEFS[type];
+  const info = document.getElementById('towerInfo');
+  info.innerHTML = `<b style="color:${def.color}">${def.name}</b><br>
+    Урон: ${def.damage}<br>
+    Радиус: ${def.range.toFixed(1)}<br>
+    Скорость: ${(1/def.fireRate).toFixed(1)}/с<br>
+    Цена: ${def.cost}◈`;
+  info.classList.add('visible');
+}
+
+function placeTower(col, row) {
+  if (!G.selectedTowerType) return;
+  const key = `${col},${row}`;
+  if (G.blockedCells.has(key)) return; // Нельзя на дорогу/другую башню
+
+  const def = TOWER_DEFS[G.selectedTowerType];
+  if (G.gold < def.cost) return;
+
+  G.gold -= def.cost;
+  Audio.build();
+
+  // Добавляем башню
+  G.towers.push({
+    id: Math.random(),
+    type: G.selectedTowerType,
+    col, row,
+    x: (col + 0.5) * G.tileSize,
+    y: (row + 0.5) * G.tileSize,
+    level: 1,
+    range: def.range * G.tileSize,
+    damage: def.damage,
+    fireRate: def.fireRate,
+    aoeRadius: (def.aoeRadius || 0) * G.tileSize,
+    slowDuration: def.slowDuration || 0,
+    slowFactor: def.slowFactor || 1,
+    cooldown: 0,
+    angle: 0,
+    target: null,
+    color: def.color,
+    lastFireTime: 0,
+  });
+
+  // Блокируем ячейку
+  G.blockedCells.add(key);
+  G.selectedTowerType = null;
+  document.querySelectorAll('.tower-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('towerInfo').classList.remove('visible');
+  updateHUD();
+}
+
+function updateTowers(dt, now) {
+  G.towers.forEach(tower => {
+    tower.cooldown = Math.max(0, tower.cooldown - dt);
+    if (tower.cooldown > 0) return;
+
+    // Поиск цели: ближайший враг в радиусе
+    let closest = null;
+    let closestDist = Infinity;
+    G.enemies.forEach(enemy => {
+      if (!enemy.alive) return;
+      const d = Math.hypot(enemy.x - tower.x, enemy.y - tower.y);
+      if (d <= tower.range && d < closestDist) {
+        closestDist = d;
+        closest = enemy;
+      }
+    });
+
+    if (!closest) { tower.target = null; return; }
+    tower.target = closest;
+
+    // Поворот башни
+    tower.angle = Math.atan2(closest.y - tower.y, closest.x - tower.x);
+
+    // Атака
+    tower.cooldown = tower.fireRate;
+
+    if (tower.type === 'laser') {
+      Audio.laser();
+      dealDamage(closest, tower.damage, tower);
+      // Визуальная линия лазера
+      G.projectiles.push({
+        type: 'laser',
+        x1: tower.x, y1: tower.y,
+        x2: closest.x, y2: closest.y,
+        color: tower.color,
+        life: 0.08,
+      });
+    } else if (tower.type === 'slow') {
+      dealDamage(closest, tower.damage, tower);
+      closest.slowed = tower.slowDuration;
+      closest.slowFactor = tower.slowFactor;
+      G.projectiles.push({
+        type: 'laser',
+        x1: tower.x, y1: tower.y,
+        x2: closest.x, y2: closest.y,
+        color: tower.color,
+        life: 0.12,
+      });
+    } else if (tower.type === 'rocket') {
+      // Создаём ракету
+      G.projectiles.push({
+        type: 'rocket',
+        x: tower.x, y: tower.y,
+        tx: closest.x, ty: closest.y,
+        targetId: closest.id,
+        speed: 300,
+        color: tower.color,
+        aoeRadius: tower.aoeRadius,
+        damage: tower.damage,
+        life: 5,
+        hit: false,
+      });
+    }
+  });
+}
+
+function dealDamage(enemy, damage, tower) {
+  enemy.hp -= damage;
+  if (enemy.hp <= 0) killEnemy(enemy, tower.x, tower.y);
+}
+
+function killEnemy(enemy, ox, oy) {
+  if (!enemy.alive) return;
+  enemy.alive = false;
+  G.gold += enemy.reward;
+  G.kills++;
+  G.score += enemy.reward * 10;
+  updateHUD();
+
+  // Частицы
+  spawnParticles(enemy.x, enemy.y, enemy.color, 12);
+
+  // Всплывающий текст
+  G.floatingTexts.push({
+    x: enemy.x, y: enemy.y - enemy.size,
+    text: `+${enemy.reward}◈`,
+    color: '#ffd700',
+    life: 1.2,
+    vy: -40,
+  });
+}
+
+// ===================== СНАРЯДЫ =====================
+function updateProjectiles(dt) {
+  G.projectiles = G.projectiles.filter(p => {
+    if (p.type === 'laser') {
+      p.life -= dt;
+      return p.life > 0;
+    }
+    if (p.type === 'rocket' && !p.hit) {
+      // Ищем актуальную позицию цели
+      const target = G.enemies.find(e => e.id === p.targetId && e.alive);
+      if (target) { p.tx = target.x; p.ty = target.y; }
+
+      const dx = p.tx - p.x;
+      const dy = p.ty - p.y;
+      const dist = Math.hypot(dx, dy);
+      const step = p.speed * dt;
+
+      if (dist <= step) {
+        // Взрыв
+        p.hit = true;
+        Audio.explosion();
+        explodeAt(p.tx, p.ty, p.aoeRadius, p.damage);
+        G.explosions.push({ x: p.tx, y: p.ty, r: p.aoeRadius, life: 0.35, maxLife: 0.35 });
+        return false;
+      } else {
+        p.x += (dx / dist) * step;
+        p.y += (dy / dist) * step;
+        p.life -= dt;
+        return p.life > 0;
+      }
+    }
+    return false;
+  });
+}
+
+function explodeAt(ex, ey, radius, damage) {
+  G.enemies.forEach(enemy => {
+    if (!enemy.alive) return;
+    const d = Math.hypot(enemy.x - ex, enemy.y - ey);
+    if (d <= radius) {
+      dealDamage(enemy, damage, { x: ex, y: ey });
+    }
+  });
+  spawnParticles(ex, ey, '#ff6600', 20);
+}
+
+// ===================== ЧАСТИЦЫ =====================
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 50 + Math.random() * 150;
+    G.particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      color,
+      size: 2 + Math.random() * 4,
+      life: 0.5 + Math.random() * 0.5,
+      maxLife: 0.5 + Math.random() * 0.5,
+    });
+  }
+}
+
+function updateParticles(dt) {
+  G.particles.forEach(p => {
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vx *= 0.95;
+    p.vy *= 0.95;
+    p.life -= dt;
+  });
+  G.particles = G.particles.filter(p => p.life > 0);
+}
+
+function updateFloatingTexts(dt) {
+  G.floatingTexts.forEach(t => {
+    t.y += t.vy * dt;
+    t.life -= dt;
+  });
+  G.floatingTexts = G.floatingTexts.filter(t => t.life > 0);
+}
+
+function updateExplosions(dt) {
+  G.explosions.forEach(e => { e.life -= dt; });
+  G.explosions = G.explosions.filter(e => e.life > 0);
+}
+
+// ===================== СПАВН ВОЛНЫ =====================
+function updateSpawner(dt) {
+  if (!G.waveInProgress) return;
+  G.spawnTimer -= dt;
+  if (G.spawnTimer <= 0 && G.enemiesSpawned < G.enemiesToSpawn) {
+    spawnEnemy();
+    G.enemiesSpawned++;
+    G.spawnTimer = 0.9 - Math.min(0.6, G.wave * 0.02);
+  }
+
+  // Волна завершена
+  if (G.enemiesSpawned >= G.enemiesToSpawn && G.enemies.length === 0) {
+    G.waveInProgress = false;
+    G.betweenWaves = true;
+    if (G.wave >= G.totalWaves) {
+      endGame(true);
+    } else {
+      showNextWaveBtn(true);
+    }
+  }
+}
+
+// ===================== КОНЕЦ ИГРЫ =====================
+function endGame(victory) {
+  G.running = false;
+  if (victory) {
+    document.getElementById('victoryStats').innerHTML =
+      `Волны: <span>${G.wave} / ${G.totalWaves}</span><br>
+       Уничтожено: <span>${G.kills}</span><br>
+       Очки: <span>${G.score}</span>`;
+    showScreen('victoryScreen');
+  } else {
+    Audio.gameOver();
+    document.getElementById('gameOverStats').innerHTML =
+      `Пройдено волн: <span>${G.wave}</span><br>
+       Уничтожено: <span>${G.kills}</span><br>
+       Очки: <span>${G.score}</span>`;
+    showScreen('gameOverScreen');
+  }
+}
+
+// ===================== ТРЯСКА ЭКРАНА =====================
+function shakeScreen() {
+  const s = document.getElementById('gameScreen');
+  s.classList.add('shake');
+  setTimeout(() => s.classList.remove('shake'), 350);
+}
+
+// ===================== АПГРЕЙД МЕНЮ =====================
+function openUpgradeMenu(tower, screenX, screenY) {
+  G.selectedTower = tower;
+  const menu = document.getElementById('upgradeMenu');
+  const def = TOWER_DEFS[tower.type];
+
+  document.getElementById('upgMenuLabel').textContent = `${def.name} LVL ${tower.level}`;
+
+  const upgBtn = document.getElementById('upgBtn');
+  if (tower.level < def.maxLevel) {
+    const cost = Math.round(def.upgradeCost * tower.level);
+    upgBtn.textContent = `Улучшить (+${Math.round((def.upgradeMult.damage - 1) * 100)}% урон) · ${cost}◈`;
+    upgBtn.style.display = 'block';
+  } else {
+    upgBtn.style.display = 'none';
+  }
+
+  const sellVal = Math.round(def.cost * 0.5 * tower.level);
+  document.getElementById('sellVal').textContent = sellVal;
+
+  // Позиционируем меню
+  const mw = 170, mh = 120;
+  let mx = Math.min(screenX, window.innerWidth - mw - 10);
+  let my = Math.max(G.hudH + 5, Math.min(screenY - mh - 10, window.innerHeight - G.panelH - mh - 10));
+  menu.style.left = mx + 'px';
+  menu.style.top = my + 'px';
+  menu.classList.add('visible');
+}
+
+function closeUpgradeMenu() {
+  G.selectedTower = null;
+  document.getElementById('upgradeMenu').classList.remove('visible');
+}
+
+function upgradeSelected() {
+  if (!G.selectedTower) return;
+  const tower = G.selectedTower;
+  const def = TOWER_DEFS[tower.type];
+  if (tower.level >= def.maxLevel) return;
+
+  const cost = Math.round(def.upgradeCost * tower.level);
+  if (G.gold < cost) { return; }
+
+  G.gold -= cost;
+  tower.level++;
+  const m = def.upgradeMult;
+  tower.damage = Math.round(tower.damage * m.damage);
+  tower.range *= (m.range || 1);
+  if (m.fireRate) tower.fireRate *= m.fireRate;
+  if (m.aoeRadius && tower.aoeRadius) tower.aoeRadius *= m.aoeRadius;
+
+  Audio.build();
+  updateHUD();
+  closeUpgradeMenu();
+}
+
+function sellSelected() {
+  if (!G.selectedTower) return;
+  const tower = G.selectedTower;
+  const def = TOWER_DEFS[tower.type];
+  const val = Math.round(def.cost * 0.5 * tower.level);
+  G.gold += val;
+
+  const key = `${tower.col},${tower.row}`;
+  G.blockedCells.delete(key);
+  G.towers = G.towers.filter(t => t !== tower);
+
+  Audio.click();
+  updateHUD();
+  closeUpgradeMenu();
+}
+
+// ===================== ВВОД (МЫШЬ/ТАЧ) =====================
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  G.mouseX = e.clientX - rect.left;
+  G.mouseY = e.clientY - rect.top;
+});
+
+canvas.addEventListener('click', handleCanvasClick);
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.changedTouches[0];
+  G.mouseX = touch.clientX - rect.left;
+  G.mouseY = touch.clientY - rect.top;
+  handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.changedTouches[0];
+  G.mouseX = touch.clientX - rect.left;
+  G.mouseY = touch.clientY - rect.top;
+}, { passive: false });
+
+function handleCanvasClick(e) {
+  Audio.init();
+  const col = Math.floor(G.mouseX / G.tileSize);
+  const row = Math.floor(G.mouseY / G.tileSize);
+
+  if (G.selectedTowerType) {
+    placeTower(col, row);
+    return;
+  }
+
+  // Проверяем, кликнули ли по башне
+  const tower = G.towers.find(t => t.col === col && t.row === row);
+  if (tower) {
+    Audio.click();
+    openUpgradeMenu(tower, e.clientX, e.clientY);
+    return;
+  }
+
+  closeUpgradeMenu();
+}
+
+// Нажатие Escape отменяет выбор башни
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (G.selectedTowerType) {
+      G.selectedTowerType = null;
+      document.querySelectorAll('.tower-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('towerInfo').classList.remove('visible');
+    } else if (!G.paused) {
+      togglePause();
+    }
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (G.running) {
+    // Пересчитываем, перемещаем башни
+    const oldTile = G.tileSize;
+    resizeCanvas();
+    const ratio = G.tileSize / oldTile;
+    G.towers.forEach(t => {
+      t.x = (t.col + 0.5) * G.tileSize;
+      t.y = (t.row + 0.5) * G.tileSize;
+      t.range *= ratio;
+      t.aoeRadius *= ratio;
+    });
+    G.enemies.forEach(e => {
+      e.x *= ratio; e.y *= ratio;
+      e.size *= ratio;
+      e.speed *= ratio;
+    });
+    G.path = PATH_TILES.map(([col, row]) => ({
+      x: (col + 0.5) * G.tileSize,
+      y: (row + 0.5) * G.tileSize
+    }));
+  }
+});
+
+// ===================== РЕНДЕР =====================
+function render() {
+  const c = ctx;
+  const W = G.canvasW, H = G.canvasH;
+  const ts = G.tileSize;
+
+  // Фон
+  c.fillStyle = '#050510';
+  c.fillRect(0, 0, W, H);
+
+  // Сетка
+  c.strokeStyle = 'rgba(0,255,255,0.04)';
+  c.lineWidth = 0.5;
+  for (let x = 0; x < W; x += ts) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); }
+  for (let y = 0; y < H; y += ts) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+
+  // Дорога (фон)
+  drawRoad(c, ts);
+
+  // Взрывы
+  G.explosions.forEach(ex => {
+    const alpha = ex.life / ex.maxLife;
+    const grad = c.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, ex.r * (2 - alpha));
+    grad.addColorStop(0, `rgba(255,200,50,${alpha * 0.8})`);
+    grad.addColorStop(0.5, `rgba(255,100,0,${alpha * 0.5})`);
+    grad.addColorStop(1, 'rgba(255,50,0,0)');
+    c.fillStyle = grad;
+    c.beginPath();
+    c.arc(ex.x, ex.y, ex.r * (2 - alpha), 0, Math.PI * 2);
+    c.fill();
+  });
+
+  // Башни
+  G.towers.forEach(t => drawTower(c, t, ts));
+
+  // Враги
+  G.enemies.forEach(e => { if (e.alive) drawEnemy(c, e); });
+
+  // Снаряды
+  G.projectiles.forEach(p => {
+    if (p.type === 'laser') {
+      const alpha = p.life > 0 ? Math.min(1, p.life * 15) : 0;
+      c.strokeStyle = p.color;
+      c.lineWidth = 2.5;
+      c.shadowColor = p.color;
+      c.shadowBlur = 8;
+      c.globalAlpha = alpha;
+      c.beginPath();
+      c.moveTo(p.x1, p.y1);
+      c.lineTo(p.x2, p.y2);
+      c.stroke();
+      c.globalAlpha = 1;
+      c.shadowBlur = 0;
+    } else if (p.type === 'rocket') {
+      c.fillStyle = '#ff9900';
+      c.shadowColor = '#ff6600';
+      c.shadowBlur = 10;
+      c.beginPath();
+      c.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      c.fill();
+      c.shadowBlur = 0;
+    }
+  });
+
+  // Частицы
+  G.particles.forEach(p => {
+    const alpha = p.life / (p.maxLife || 1);
+    c.globalAlpha = alpha;
+    c.fillStyle = p.color;
+    c.shadowColor = p.color;
+    c.shadowBlur = 4;
+    c.beginPath();
+    c.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+    c.fill();
+  });
+  c.globalAlpha = 1;
+  c.shadowBlur = 0;
+
+  // Всплывающий текст
+  G.floatingTexts.forEach(t => {
+    const alpha = Math.min(1, t.life);
+    c.globalAlpha = alpha;
+    c.fillStyle = t.color;
+    c.shadowColor = t.color;
+    c.shadowBlur = 8;
+    c.font = `bold ${ts * 0.3}px Orbitron, monospace`;
+    c.textAlign = 'center';
+    c.fillText(t.text, t.x, t.y);
+  });
+  c.globalAlpha = 1;
+  c.shadowBlur = 0;
+
+  // Курсор башни (превью)
+  if (G.selectedTowerType) {
+    const def = TOWER_DEFS[G.selectedTowerType];
+    const range = def.range * ts;
+    const col = Math.floor(G.mouseX / ts);
+    const row = Math.floor(G.mouseY / ts);
+    const cx = (col + 0.5) * ts;
+    const cy = (row + 0.5) * ts;
+    const blocked = G.blockedCells.has(`${col},${row}`);
+
+    // Зона радиуса
+    c.beginPath();
+    c.arc(cx, cy, range, 0, Math.PI * 2);
+    c.fillStyle = blocked ? 'rgba(255,0,0,0.07)' : 'rgba(0,255,255,0.06)';
+    c.fill();
+    c.strokeStyle = blocked ? 'rgba(255,0,0,0.5)' : 'rgba(0,255,255,0.4)';
+    c.lineWidth = 1.5;
+    c.setLineDash([5, 4]);
+    c.stroke();
+    c.setLineDash([]);
+
+    // Превью башни
+    c.globalAlpha = 0.7;
+    drawTowerShape(c, cx, cy, ts * 0.4, def.color, G.selectedTowerType, 0);
+    c.globalAlpha = 1;
+  }
+}
+
+function drawRoad(c, ts) {
+  if (G.path.length < 2) return;
+
+  // Тень дороги
+  c.shadowColor = 'rgba(0,100,200,0.3)';
+  c.shadowBlur = 15;
+  c.strokeStyle = '#101a2e';
+  c.lineWidth = ts * 1.1;
+  c.lineJoin = 'round';
+  c.lineCap = 'round';
+  c.beginPath();
+  c.moveTo(G.path[0].x, G.path[0].y);
+  G.path.forEach((p, i) => { if (i > 0) c.lineTo(p.x, p.y); });
+  c.stroke();
+
+  // Основная дорога
+  c.shadowBlur = 0;
+  c.strokeStyle = '#1a2540';
+  c.lineWidth = ts * 0.92;
+  c.beginPath();
+  c.moveTo(G.path[0].x, G.path[0].y);
+  G.path.forEach((p, i) => { if (i > 0) c.lineTo(p.x, p.y); });
+  c.stroke();
+
+  // Неоновые края
+  c.strokeStyle = 'rgba(0,150,255,0.25)';
+  c.lineWidth = ts * 0.94;
+  c.setLineDash([ts * 0.5, ts * 0.3]);
+  c.beginPath();
+  c.moveTo(G.path[0].x, G.path[0].y);
+  G.path.forEach((p, i) => { if (i > 0) c.lineTo(p.x, p.y); });
+  c.stroke();
+  c.setLineDash([]);
+
+  // Старт и финиш
+  const start = G.path[0];
+  const end = G.path[G.path.length - 1];
+
+  c.shadowColor = '#00ff88';
+  c.shadowBlur = 12;
+  c.fillStyle = '#00ff88';
+  c.beginPath();
+  c.arc(start.x, start.y, ts * 0.3, 0, Math.PI * 2);
+  c.fill();
+  c.fillStyle = '#030308';
+  c.font = `bold ${ts * 0.28}px Orbitron, monospace`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText('▶', start.x, start.y);
+
+  c.shadowColor = '#ff004c';
+  c.fillStyle = '#ff004c';
+  c.beginPath();
+  c.arc(end.x, end.y, ts * 0.3, 0, Math.PI * 2);
+  c.fill();
+  c.fillStyle = '#fff';
+  c.fillText('⊠', end.x, end.y);
+  c.shadowBlur = 0;
+}
+
+function drawTower(c, t, ts) {
+  const r = ts * 0.45;
+  c.shadowColor = t.color;
+  c.shadowBlur = 12;
+  drawTowerShape(c, t.x, t.y, r, t.color, t.type, t.angle);
+  c.shadowBlur = 0;
+
+  // Уровень
+  if (t.level > 1) {
+    c.fillStyle = '#ffd700';
+    c.font = `bold ${ts * 0.22}px Orbitron, monospace`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('★'.repeat(t.level - 1), t.x, t.y + r * 0.85);
+  }
+
+  // Если выбрана для апгрейда — показываем кольцо
+  if (G.selectedTower && G.selectedTower === t) {
+    c.strokeStyle = '#ffd700';
+    c.lineWidth = 2;
+    c.shadowColor = '#ffd700';
+    c.shadowBlur = 8;
+    c.beginPath();
+    c.arc(t.x, t.y, r + 4, 0, Math.PI * 2);
+    c.stroke();
+    c.shadowBlur = 0;
+  }
+}
+
+function drawTowerShape(c, cx, cy, r, color, type, angle) {
+  // Основание
+  c.fillStyle = '#0d0d20';
+  c.strokeStyle = color;
+  c.lineWidth = 2;
+  c.beginPath();
+  c.arc(cx, cy, r, 0, Math.PI * 2);
+  c.fill();
+  c.stroke();
+
+  c.save();
+  c.translate(cx, cy);
+  c.rotate(angle);
+
+  if (type === 'laser') {
+    // Лазерная пушка: прямоугольник-ствол
+    c.fillStyle = color;
+    c.shadowColor = color;
+    c.shadowBlur = 6;
+    c.fillRect(-r * 0.15, -r * 0.7, r * 0.3, r * 0.7);
+    c.beginPath();
+    c.arc(0, 0, r * 0.35, 0, Math.PI * 2);
+    c.fill();
+  } else if (type === 'slow') {
+    // Замедлитель: 4 луча
+    c.fillStyle = color;
+    c.shadowColor = color;
+    c.shadowBlur = 6;
+    for (let i = 0; i < 4; i++) {
+      c.save();
+      c.rotate((i / 4) * Math.PI * 2);
+      c.fillRect(-r * 0.1, -r * 0.75, r * 0.2, r * 0.45);
+      c.restore();
+    }
+    c.beginPath();
+    c.arc(0, 0, r * 0.3, 0, Math.PI * 2);
+    c.fill();
+  } else if (type === 'rocket') {
+    // Ракетница: толстый ствол
+    c.fillStyle = color;
+    c.shadowColor = color;
+    c.shadowBlur = 6;
+    c.fillRect(-r * 0.22, -r * 0.65, r * 0.44, r * 0.65);
+    c.fillRect(-r * 0.3, -r * 0.7, r * 0.6, r * 0.2);
+    c.beginPath();
+    c.arc(0, 0, r * 0.35, 0, Math.PI * 2);
+    c.fill();
+  }
+
+  c.restore();
+}
+
+function drawEnemy(c, enemy) {
+  const r = enemy.size * 0.5;
+  const isSlowed = enemy.slowed > 0;
+  const color = isSlowed ? '#00ccff' : enemy.color;
+
+  // Тело
+  c.shadowColor = color;
+  c.shadowBlur = isSlowed ? 12 : 8;
+  c.fillStyle = color;
+
+  if (enemy.type === 'boss') {
+    // Босс — шестиугольник
+    c.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2 - Math.PI / 6;
+      const px = enemy.x + Math.cos(angle) * r;
+      const py = enemy.y + Math.sin(angle) * r;
+      if (i === 0) c.moveTo(px, py); else c.lineTo(px, py);
+    }
+    c.closePath();
+    c.fill();
+  } else if (enemy.type === 'tank') {
+    // Танк — квадрат со скруглёнными углами
+    c.beginPath();
+    c.roundRect(enemy.x - r, enemy.y - r, r * 2, r * 2, r * 0.3);
+    c.fill();
+  } else if (enemy.type === 'fast') {
+    // Быстрый — треугольник
+    c.beginPath();
+    c.moveTo(enemy.x, enemy.y - r);
+    c.lineTo(enemy.x + r * 0.86, enemy.y + r * 0.5);
+    c.lineTo(enemy.x - r * 0.86, enemy.y + r * 0.5);
+    c.closePath();
+    c.fill();
+  } else {
+    // Обычный — круг
+    c.beginPath();
+    c.arc(enemy.x, enemy.y, r, 0, Math.PI * 2);
+    c.fill();
+  }
+  c.shadowBlur = 0;
+
+  // Полоска HP над врагом
+  const barW = r * 2.5;
+  const barH = Math.max(4, r * 0.3);
+  const barX = enemy.x - barW / 2;
+  const barY = enemy.y - r - barH - 3;
+  const hpRatio = enemy.hp / enemy.maxHP;
+
+  // Фон полоски
+  c.fillStyle = 'rgba(0,0,0,0.7)';
+  c.fillRect(barX, barY, barW, barH);
+
+  // HP
+  const hpColor = hpRatio > 0.5 ? '#00ff44' : hpRatio > 0.25 ? '#ffaa00' : '#ff2244';
+  c.fillStyle = hpColor;
+  c.shadowColor = hpColor;
+  c.shadowBlur = 4;
+  c.fillRect(barX, barY, barW * hpRatio, barH);
+  c.shadowBlur = 0;
+
+  // Рамка
+  c.strokeStyle = 'rgba(255,255,255,0.2)';
+  c.lineWidth = 0.5;
+  c.strokeRect(barX, barY, barW, barH);
+
+  // Если замедлен, синий кружок
+  if (isSlowed) {
+    c.fillStyle = 'rgba(0,180,255,0.6)';
+    c.beginPath();
+    c.arc(enemy.x, enemy.y, r * 1.2, 0, Math.PI * 2);
+    c.fill();
+  }
+}
+
+// ===================== ГЛАВНЫЙ ИГРОВОЙ ЦИКЛ =====================
+function gameLoop(timestamp) {
+  if (!G.running || G.paused) return;
+
+  const dt = Math.min((timestamp - G.lastTime) / 1000, 0.05); // delta в секундах
+  G.lastTime = timestamp;
+
+  // Обновление логики
+  updateSpawner(dt);
+  updateEnemies(dt);
+  updateTowers(dt, timestamp / 1000);
+  updateProjectiles(dt);
+  updateParticles(dt);
+  updateFloatingTexts(dt);
+  updateExplosions(dt);
+
+  // Рендер
+  render();
+
+  if (G.running) requestAnimationFrame(gameLoop);
+}
+
+// Инициализация при первом взаимодействии
+document.addEventListener('click', () => Audio.init(), { once: true });
+document.addEventListener('touchstart', () => Audio.init(), { once: true });
+
+// Привязка кнопок меню к AudioContext
+document.querySelectorAll('.btn, .diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => Audio.init());
+});
+
+// Инициализируем дефолтную сложность визуально
+document.querySelector('.diff-btn.active-normal') && null; // уже есть в HTML
+</script>
+</body>
+</html>
